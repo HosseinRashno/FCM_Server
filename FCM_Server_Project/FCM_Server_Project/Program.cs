@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FCM_Server_Project.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace FCM_Server_Project
 {
     class Program
     {
+        public const string SERVER_KEY = "YOUR_SERVER_KEY";
+
         static void Main(string[] args)
         {
             while (true)
@@ -18,10 +21,11 @@ namespace FCM_Server_Project
                 switch (command.ToLower())
                 {
                     case "topic":
-                        // TODO : Get information about message and send that to selected device id
+                        NotificationClass messageForTopic = GetTheMessage();
+                        SendMessageToTopic(messageForTopic);
                         break;
                     case "id":
-                        // TODO : Get information about message and send that to selected topic
+                        NotificationClass messageForId = GetTheMessage();
                         break;
                     case "exit":
                         return;
@@ -30,6 +34,37 @@ namespace FCM_Server_Project
                         break;
                 }
             }
+        }
+
+        private static NotificationClass GetTheMessage()
+        {
+            NotificationClass message = new NotificationClass();
+
+            Console.WriteLine("Insert the title:");
+            message.title = Console.ReadLine();
+
+            Console.WriteLine("Insert the body");
+            message.body = Console.ReadLine();
+
+            return message;
+        }
+
+        private static void SendMessageToTopic(NotificationClass message)
+        {
+            Console.WriteLine("Insert the topic name");
+            string topicName = Console.ReadLine();
+
+            RequestClass req = new RequestClass();
+            req.to = StaticHelper.TOPIC_NAME_FORMAT+topicName;
+            req.notification.title = message.title;
+            req.notification.body = message.body;
+
+            ResponseForTopic response = StaticHelper.SendMessageToTopic(req);
+
+            if (response.ErrorCode == null && response.error == null)
+                Console.Write("Message sent successfully.");
+            else
+                Console.Write("Failed to send message");
         }
     }
 }
